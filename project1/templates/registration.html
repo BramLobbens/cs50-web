@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+project 1
+{% endblock %}
+
+{% block body %}
+<h2>Register</h2>
+
+<fieldset>
+  <legend>Create an Account</legend>
+  <form action="{{ url_for('register') }}" method="post">
+    <div class="form-group">
+      <label for="username">Username:</label>
+      <input class="form-control" type="text" name="user_name"
+	     placeholder="Choose a username" required />
+      <label for="password">Password:</label>
+      <input class="form-control" type="password" name="password"
+	     minlength="8" required
+	     placeholder="8 characters minimum" />
+    </div>
+    <div class="form-group">
+      <button class="btn btn-primary">Create my account</button>
+    </div>
+  </form>
+</fieldset>
+{% endblock %}

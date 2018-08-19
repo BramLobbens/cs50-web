@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Search for books
+{% endblock %}
+
+{% block body %}
+<h2>Search for Books<h2>
+<div class="text-info">
+    Hello {{ name }}. You can search here for book titles, authors, and more!
+</div>
+<form action="{{ url_for('find_book') }}" method="post">
+  <div class="form-group">
+    <input class="form-control" style="text" name="search" placeholder="Enter your query" />
+  </div>
+</form>
+<div>
+  <p>Result:</p>
+  <ul>
+    {% for res in result %}
+    <li>Title: {{ res.title }}, Year: {{ res.year }}</li>
+    {% endfor %}
+  </ul>
+</div>
+    
+{% endblock %}
