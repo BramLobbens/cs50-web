@@ -7,9 +7,10 @@ Search for books
 {% block body %}
 <h2>Search for Books<h2>
 <div class="text-info">
-    Hello {{ name }}. You can search here for book titles, authors, and more!
+  <p>Hello, you can search here for books.</br>
+  Search by book title, author, or isbn.</p>
 </div>
-<form action="{{ url_for('find_book') }}" method="post">
+<form action="{{ url_for('lookup') }}" method="post">
   <div class="form-group">
     <input class="form-control" style="text" name="search" placeholder="Enter your query" />
   </div>
@@ -17,9 +18,15 @@ Search for books
 <div>
   <p>Result:</p>
   <ul>
+    {% if result == 0 %}
+    <li>No result found</li>
+    {% else %}
     {% for res in result %}
-    <li>Title: {{ res.title }}, Year: {{ res.year }}</li>
+    <a href="{{ url_for('book', book_isbn=res.isbn) }}">
+      <li>{{ res.title }}, by {{ res.author }}</li>
+    </a>
     {% endfor %}
+    {% endif %}
   </ul>
 </div>
     

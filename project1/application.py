@@ -3,7 +3,7 @@ import requests
 
 from flask import Flask, session, render_template, request
 from flask_session import Session
-from flask_login import LoginManager
+#from flask_login import LoginManager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -28,8 +28,8 @@ db = scoped_session(sessionmaker(bind=engine))
 # TO DO: implement usage
 # check project tips to use flask_session
 # LoginManager
-login_manager = LoginManager()
-login_manager.init_app(app)
+#login_manager = LoginManager()
+#login_manager.init_app(app)
 
 @app.route("/")
 def index():
@@ -69,7 +69,6 @@ def login():
     """Log in a user"""
 
     # TO DO: implement better and safer solution!
-    global user_name
     user_name = request.form.get("user_name")
     password = request.form.get("password")
     
@@ -80,17 +79,43 @@ def login():
     return render_template("error.html", message="Incorrect username or password.")
 
 # Content Routes
-@app.route("/find_book", methods=["POST"])
+@app.route("/lookup", methods=["POST"])
 #@login_required
-def find_book():
+def lookup():
     """Search for books"""
+
+    # TO DO: refine with wildcard to curb superfluous results
     
     # logged in users can search for books
+    # via 'isbn', 'author', or 'title'
     query = request.form.get("search")
-    res = db.execute("SELECT * FROM books WHERE author = :query",
-                     {"query": query}).fetchall()
-    return render_template("search.html", result=res, name=user_name)
+    if not query:
+        return render_template("search.html", result=0)
+    
+    # query 'isbn'
+    if query.isdigit():
+        res = db.execute("SELECT * FROM books WHERE isbn LIKE :query",
+                         {"query": f"{query}%"}).fetchall()
+    else:
+        # query 'author'
+        res = db.execute("SELECT * FROM books WHERE author LIKE :query",
+                          {"query": f"{query}%"}).fetchall()
+        # If no result from author, query 'title'
+        if len(res) == 0:
+            res = db.execute("SELECT * FROM books WHERE title LIKE :query",
+                             {"query": f"{query}%"}).fetchall()
+    if len(res) == 0:
+        res = 0
+    return render_template("search.html", result=res)
 
+@app.route("/book/<book_isbn>")
+def book(book_isbn):
+    """Return book details"""
 
-    #res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": api_key, "isbns": "9781632168146"})
-    #foo = res.json()
+    if len(book_isbn) == 10 and book_isbn.isdigit():
+        res = db.execute("SELECT * FROM books WHERE isbn = :book_isbn",
+                          {"book_isbn": book_isbn}).fetchone()
+        return render_template("book.html", book=res)
+    return render_template("error.html", message="Oops, something went wrong.")
+        
+    
