@@ -11,3 +11,12 @@ CREATE TABLE books (
        author VARCHAR NOT NULL,
        year VARCHAR NOT NULL
 );
+
+CREATE TABLE reviews (
+       id SERIAL PRIMARY KEY,
+       text VARCHAR NOT NULL,
+       score INTEGER NOT NULL,
+       user_id INTEGER REFERENCES users,
+       book_id INTEGER REFERENCES books
+);
+       

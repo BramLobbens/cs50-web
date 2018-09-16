@@ -65,12 +65,15 @@ def search():
     password = request.form.get("password")
 
     if not session.get("user_name"):
-        session["user_name"] = ""
+        session["user_id"] = ""
+
+    user_res = db.execute("SELECT * FROM users WHERE user_name = :user_name",
+                              {"user_name": user_name}).fetchone()
+    session["user_id"] = user_res.id
     
     if db.execute("SELECT password FROM users WHERE user_name = :user_name",
                                {"user_name": user_name}).fetchone()[0] == password:
-        session["user_name"] = user_name
-        return render_template("search.html", name=session["user_name"])
+        return render_template("search.html")
 
     return render_template("error.html", message="Incorrect username or password.")
 
@@ -110,17 +113,40 @@ def book(book_isbn):
     if len(book_isbn) == 10 and book_isbn.isdigit():
         # Get book details
         book_res = db.execute("SELECT * FROM books WHERE isbn = :book_isbn",
-                          {"book_isbn": book_isbn}).fetchone()
-        # Get reviews
-        #review_res = db.execute("",
-        #                 {"": }).fetchall()
+                              {"book_isbn": book_isbn}).fetchone()
+        session["book_res"] = book_res
+        session["book_id"] = book_res.id
 
-        review_res = ""
+        # Get reviews
+        review_res = db.execute("SELECT * FROM reviews WHERE book_id = :book_id",
+                         {"book_id": session["book_id"]}).fetchall()
+        session["review_res"] = review_res
+
         return render_template("book.html", book=book_res, reviews=review_res)
 
     return render_template("error.html", message="Oops, something went wrong.")
 
 # to implement
-#@app.route()
+@app.route("/post_review", methods=["POST"])
 def post_review():
-    pass
+    """"""
+
+    review = request.form.get("review")
+    score = request.form.get("score")
+
+    # Check if user already posted a review for this book
+    # TO IMPLEMENT
+    
+    try:
+        db.execute("INSERT INTO reviews (text, score, user_id, book_id) VALUES (:text, :score, :user_id, :book_id)",
+                   {"text": review,
+                    "score": score,
+                    "user_id": session["user_id"],
+                    "book_id": session["book_id"]
+                   })    
+    except:
+        return render_template("error.html", message="Oops something went wrong")
+
+    db.commit()
+    return render_template("book.html", book=session["book_res"], reviews=session["review_res"])
+    

@@ -20,14 +20,14 @@ Book Details
   <p><i>Write a review:</i><p>
     <form action="{{ url_for('post_review') }}" method="post">
       <div class="form-group">
-	<label for="dropdown-test" class="control-label">Your score:</label>
+	<label for="score" class="control-label">Your score:</label>
 	
-	<select class="form-control" name="dropdown-test">
-	  <option>1. did not like it</option>
-	  <option>2. it was ok</option>
-	  <option>3. liked it</option>
-	  <option>4. really liked it</option>
-	  <option>5. it was amazing</option>
+	<select class="form-control" name="score">
+	  <option>1</option>
+	  <option>2</option>
+	  <option>3</option>
+	  <option>4</option>
+	  <option>5</option>
 	</select>
 	<div class="form-group">
 	  <input class="form-control" style="text" name="review" placeholder="What did you think of this book? Write down your thoughts." />
@@ -36,11 +36,15 @@ Book Details
     <div>
       <p><i>All reviews:</i></p>
       <ul>
-	{% if reviews == 0 %}
-	<li>No reviews written.</li>
+	{% if not reviews %}
+	<li>No reviews written yet.</li>
 	{% else %}
 	{% for review in reviews %}
-	  <li>{{ review }}</li>
+	<li>
+	  <p>User# {{ review.user_id }} said:</p>
+	  <p>Score: {{ review.score }}</p>
+	  <p>{{ review.text }}</p>
+	</li>
 	{% endfor %}
 	{% endif %}
       </ul>
