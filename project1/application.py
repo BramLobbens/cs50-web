@@ -3,12 +3,11 @@ import requests
 
 from flask import Flask, session, render_template, request
 from flask_session import Session
-#from flask_login import LoginManager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 # Goodreads API
-api_key = os.getenv("APP_API_KEY")
+#api_key = os.getenv("APP_API_KEY")
 
 app = Flask(__name__)
 
@@ -24,12 +23,6 @@ Session(app)
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL_P1"))
 db = scoped_session(sessionmaker(bind=engine))
-
-# TO DO: implement usage
-# check project tips to use flask_session
-# LoginManager
-#login_manager = LoginManager()
-#login_manager.init_app(app)
 
 @app.route("/")
 def index():
@@ -63,26 +56,28 @@ def register():
     db.commit()
     return render_template("success.html")
 
-@app.route("/login", methods=["POST"])
-#@login_manager.user_loader
-def login():
-    """Log in a user"""
+@app.route("/search", methods=["POST"])
+def search():
+    """Present user with book lookup after logging in"""
 
     # TO DO: implement better and safer solution!
     user_name = request.form.get("user_name")
     password = request.form.get("password")
+
+    if not session.get("user_name"):
+        session["user_name"] = ""
     
     if db.execute("SELECT password FROM users WHERE user_name = :user_name",
                                {"user_name": user_name}).fetchone()[0] == password:
-        return render_template("search.html", name=user_name)
+        session["user_name"] = user_name
+        return render_template("search.html", name=session["user_name"])
 
     return render_template("error.html", message="Incorrect username or password.")
 
 # Content Routes
 @app.route("/lookup", methods=["POST"])
-#@login_required
 def lookup():
-    """Search for books"""
+    """Lookup user query in database"""
 
     # TO DO: refine with wildcard to curb superfluous results
     
@@ -110,12 +105,22 @@ def lookup():
 
 @app.route("/book/<book_isbn>")
 def book(book_isbn):
-    """Return book details"""
+    """Return book details and reviews"""
 
     if len(book_isbn) == 10 and book_isbn.isdigit():
-        res = db.execute("SELECT * FROM books WHERE isbn = :book_isbn",
+        # Get book details
+        book_res = db.execute("SELECT * FROM books WHERE isbn = :book_isbn",
                           {"book_isbn": book_isbn}).fetchone()
-        return render_template("book.html", book=res)
+        # Get reviews
+        #review_res = db.execute("",
+        #                 {"": }).fetchall()
+
+        review_res = ""
+        return render_template("book.html", book=book_res, reviews=review_res)
+
     return render_template("error.html", message="Oops, something went wrong.")
-        
-    
+
+# to implement
+#@app.route()
+def post_review():
+    pass

@@ -7,18 +7,43 @@ Book Details
 {% block body %}
 <h2>{{ book.title }}<h2>
 
+<div>
+  <ul>
+    <li>Author: {{ book.author }}</li>
+    <li>Published in: {{ book.year }}</li>
+    <li>ISBN: {{ book.isbn }}</li>
+  </ul>
+</div>
+
+<div>
+  <h3>Reviews for {{ book.title }}</h3>
+  <p><i>Write a review:</i><p>
+    <form action="{{ url_for('post_review') }}" method="post">
+      <div class="form-group">
+	<label for="dropdown-test" class="control-label">Your score:</label>
+	
+	<select class="form-control" name="dropdown-test">
+	  <option>1. did not like it</option>
+	  <option>2. it was ok</option>
+	  <option>3. liked it</option>
+	  <option>4. really liked it</option>
+	  <option>5. it was amazing</option>
+	</select>
+	<div class="form-group">
+	  <input class="form-control" style="text" name="review" placeholder="What did you think of this book? Write down your thoughts." />
+	</div>
+    </form>
     <div>
-<ul>
-  <li>Author: {{ book.author }}</li>
-  <li>Published in: {{ book.year }}</li>
-  <li>ISBN: {{ book.isbn }}</li>
-</ul>
+      <p><i>All reviews:</i></p>
+      <ul>
+	{% if reviews == 0 %}
+	<li>No reviews written.</li>
+	{% else %}
+	{% for review in reviews %}
+	  <li>{{ review }}</li>
+	{% endfor %}
+	{% endif %}
+      </ul>
     </div>
-
-    <div>
-      <h3>Reviews</h3>
-      <p><i>To be implemented</i><p>
     </div>
-
-
 {% endblock %}
